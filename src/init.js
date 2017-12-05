@@ -228,12 +228,18 @@ $('.canCan').on('click', function() {
     timer = setTimeout(canCanDance, 500);
     canCan = true;
     lineUp = false;
+    document.getElementsByClassName('musicPlayer')[0].setAttribute('src', 'https://upload.wikimedia.org/wikipedia/commons/6/63/Offenbach_-_Orpheus_in_the_Underworld_-_Overture%2C_Can_Can_section.ogg');
+    document.getElementsByClassName('musicPlayer')[0].load();
+    document.getElementsByClassName('musicPlayer')[0].play();
   } else {
     clearInterval(timer);
     resetAllDancers();
     stepCount = 0;
     timer = null;
     canCan = false;
+    document.getElementsByClassName('musicPlayer')[0].setAttribute('src', 'https://upload.wikimedia.org/wikipedia/en/c/c3/Super_Mario_Bros._theme.ogg');
+    document.getElementsByClassName('musicPlayer')[0].load();
+    document.getElementsByClassName('musicPlayer')[0].play();
   }  
 });
 
