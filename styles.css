@@ -18,7 +18,7 @@ body, a:link, a:visited, a:active{
   position:absolute;
 }
 
-.blinkyDancer {
+.diamondDancer {
   background-color: transparent;
   background-image: url("https://courses.commarts.wisc.edu/547/wp-content/uploads/sites/104/2017/07/mario-2-300x300.png");
 }
@@ -33,12 +33,7 @@ body, a:link, a:visited, a:active{
   background-image: url("https://upload.wikimedia.org/wikipedia/en/e/ec/Bowser_-_New_Super_Mario_Bros_2.png");
 }
 
-.findPartner { 
-  padding: 5px 12px;
-  float: right;
-}
-
-.lineup {
+.button {
   padding:5px 12px;
   float:right;
 }
@@ -53,4 +48,12 @@ body, a:link, a:visited, a:active{
 }
 .title{
   background-color: #777;
+}
+
+.follower{
+  transition: transform 1s;
+  border: 1px solid purple;
+  position: absolute;
+  top: 0;
+  left: 0;
 }

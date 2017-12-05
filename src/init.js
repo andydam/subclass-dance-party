@@ -1,6 +1,7 @@
 $(document).ready(function() {
   window.dancers = [];
   window.lineUp = false;
+  window.following = false;
 
   $('.addDancerButton').on('click', function(event) {
     /* This function sets up the click handlers for the create-dancer
@@ -34,15 +35,54 @@ $(document).ready(function() {
     //add event handler for mouse over
     dancer.$node.mouseover(mouseOver);
   });
+
+  //add event listener for follow mouse
+  document.addEventListener('click', function(ev) {
+    var f = document.getElementsByClassName('follower');
+    for (var i = 0; i < f.length; i++) {
+      f[i].style.transform = 'translateY(' + (ev.clientY - 25) + 'px)';
+      f[i].style.transform += 'translateX(' + (ev.clientX - 25) + 'px)';
+    }
+  }, false);
 });
 
 $('.findPartner').on('click', function() {
+  //find parnter button clicked
+  //iterate through dancers array
   dancers.forEach(function(dancer) {
+    //get random color
     var color = randomColor();
+    //get closest dancer
     var closest = findClosest(dancer);
+    //set pair of dancers to same random color
     dancer.$node.css({'background-color': `${color}`});
     closest.$node.css({'background-color': `${color}`});
   });
+});
+
+$('.followMouse').on('click', function() {
+  //follow mouse button clicked
+  if (!following) {
+    //pull first dancer
+    var f = dancers[0];
+    //freeze first dancer
+    freezeAndMove(f, 0, 0);
+    //add follower class
+    f.$node.addClass('follower');
+    //remove mouseover bind
+    f.$node.unbind('mouseover');
+    following = true;
+  } else {
+    //pull first dancer
+    var f = dancers[0];
+    //remove follower class
+    f.$node.removeClass('follower');
+    //rebind mouseover
+    f.$node.mouseover(mouseOver);
+    //reset dancers
+    resetAllDancers();
+    following = false;
+  }
 });
 
 var randomColor = function() {
@@ -76,39 +116,51 @@ var mouseOver = function(event) {
   animateRotate(element, 360);
 };
 
+var freezeAndMove = function(element, top, left) {
+  //stop dancer's timer
+  clearInterval(element.timer);
+  //clear dancer's timer
+  element.timer = null;
+  //stop dancer's animations
+  element.$node.stop(true, true);
+  //make sure dancer is shown
+  element.$node.show();
+  //move dancer in line
+  element.$node.css({'top': `${top}px`, 'left': `${left}px`});
+};
+
 var lineup = function() { // buggy. If we populate with dancers, invoke lineup, and populate more dancers, they're out of sync.
   //iterate through all dancers
   if (!lineUp) {
     dancers.forEach(function(dancer, index) {
-      //stop dancer's timer
-      clearInterval(dancer.timer);
-      //clear dancer's timer
-      dancer.timer = null;
-      //stop dancer's animations
-      dancer.$node.stop(true, true);
-      //make sure dancer is shown
-      dancer.$node.show();
+      freezeAndMove(dancer);
       //move dancer in line
       dancer.$node.css({'background-color': 'transparent', 'top': `${(index * 100) + 32}px`, 'left': '200px', 'position': 'absolute'});
     });
     //set lined up status
     lineUp = true;
   } else {
-    dancers.forEach(function(dancer, index) {
-      //check if dancer still has timer
-      if (dancer.timer) {
-        //for new dancers populated when lineUp == true
-        //has timer, clear it
-        clearInterval(dancer.timer);
-      }
-      //move dancer back to start position
-      dancer.setPosition(dancer.start[0], dancer.start[1]);
-      //restart dancer's timer
-      dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps); 
-    });
+    //reset dancers
+    resetAllDancers();
     //set lined up status
     lineUp = false;
   }
+};
+
+var resetAllDancers = function() {
+  //iterate through dancers and reset
+  dancers.forEach(function(dancer, index) {
+    //check if dancer still has timer
+    if (dancer.timer) {
+      //for new dancers populated when lineUp == true
+      //has timer, clear it
+      clearInterval(dancer.timer);
+    }
+    //move dancer back to start position
+    dancer.setPosition(dancer.start[0], dancer.start[1]);
+    //restart dancer's timer
+    dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps); 
+  });
 };
 
 var findDistance = function(elem1, elem2) {
