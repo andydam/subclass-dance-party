@@ -21,6 +21,7 @@
 var BlinkyDancer = class BlinkyDancer extends Dancer {
   constructor(top, left, timeBetweenSteps) {
     super(top, left, timeBetweenSteps);
+    this.$node.addClass('blinkyDancer');
   }
   step() {
     super.step();
