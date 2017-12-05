@@ -5,6 +5,8 @@ body{
   margin: 0px;
   background-color:#444;
   font-size: 18px;
+  background-size: 100% 100%;
+  background-image: url("https://cdn.vox-cdn.com/thumbor/Zr774VwKnwoyW1G0O6uPiL_1OFM=/cdn.vox-cdn.com/uploads/chorus_asset/file/4020248/coin-block.0.gif");
 }
 body, a:link, a:visited, a:active{
   color: lightblue;

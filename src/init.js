@@ -135,7 +135,17 @@ var lineup = function() { // buggy. If we populate with dancers, invoke lineup, 
     dancers.forEach(function(dancer, index) {
       freezeAndMove(dancer);
       //move dancer in line
-      dancer.$node.css({'background-color': 'transparent', 'top': `${(index * 100) + 32}px`, 'left': '200px', 'position': 'absolute'});
+      var leftPos = 48.5;
+      if (index === 0) {
+        leftPos = 50;
+      } else if (index % 2 === 0) {
+        //if even
+        leftPos += index * 3;
+      } else {
+        //if odd
+        leftPos -= index * 3;
+      }
+      dancer.$node.css({'background-color': 'transparent', 'top': '77%', 'left': `${leftPos}%`, 'position': 'absolute'});
     });
     //set lined up status
     lineUp = true;
