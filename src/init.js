@@ -2,7 +2,9 @@ $(document).ready(function() {
   window.dancers = [];
   window.lineUp = false;
   window.following = false;
-
+  window.canCan = false;
+  window.stepCount = 0;
+  window.canCanTimer;
   $('.addDancerButton').on('click', function(event) {
     /* This function sets up the click handlers for the create-dancer
      * buttons on dancefloor.html. You should only need to make one small change to it.
@@ -174,6 +176,8 @@ var resetAllDancers = function() {
       //has timer, clear it
       clearInterval(dancer.timer);
     }
+    //stop current animations
+    dancer.$node.stop(true, true);
     //move dancer back to start position
     dancer.setPosition(dancer.start[0], dancer.start[1]);
     //restart dancer's timer
@@ -216,4 +220,75 @@ var findClosest = function(element) {
   
   //return nearest element
   return closestElement;
+};
+
+$('.canCan').on('click', function() {
+  if (!canCan) {
+    lineup();
+    timer = setTimeout(canCanDance, 500);
+    canCan = true;
+    lineUp = false;
+  } else {
+    clearInterval(timer);
+    resetAllDancers();
+    stepCount = 0;
+    timer = null;
+    canCan = false;
+  }  
+});
+
+var canCanDance = function() {
+  switch (stepCount) {
+  case 0:
+    //move dancer 50px left and 50px up
+    $('.dancer').animate({'left': '-=50px', 'top': '-=50px'});
+    //advance count by one
+    stepCount = 1;
+    break;
+  case 1:
+    //move dancer 50px right and 50px down
+    $('.dancer').animate({'left': '+=50px', 'top': '+=50px'});
+    //advance count by one
+    stepCount = 2;
+    break;
+  case 2:
+    //move dancer 100px left and 100px up
+    $('.dancer').animate({'left': '-=100px', 'top': '-=100px'});
+    //advance count by one
+    stepCount = 3;
+    break;
+  case 3:
+    //move dancer 100px right and 100px down
+    $('.dancer').animate({'left': '+=100px', 'top': '+=100px'});
+    //advance count by one
+    stepCount = 4;
+    break;
+  case 4:
+    //move dancer 50px right and 50px up
+    $('.dancer').animate({'left': '+=50px', 'top': '-=50px'});
+    //advance count by one
+    stepCount = 5;
+    break;
+  case 5:
+    //move dancer 50px left and 50px down
+    $('.dancer').animate({'left': '-=50px', 'top': '+=50px'});
+    //advance count by one
+    stepCount = 6;
+    break;
+  case 6:
+    //move dancer 100px right and 100px up
+    $('.dancer').animate({'left': '+=100px', 'top': '-=100px'});
+    //advance count by one
+    stepCount = 7;
+    break;
+  case 7:
+    //move dancer 100px left and 50px down
+    $('.dancer').animate({'left': '-=100px', 'top': '+=100px'});
+    //advance count by one
+    stepCount = 0;
+    break;
+  }
+
+  //set interval of steps
+  timer = setTimeout(canCanDance, 500);
 };
