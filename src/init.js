@@ -85,6 +85,14 @@ $('.followMouse').on('click', function() {
   }
 });
 
+$('.music').on('click', function() {
+  if (document.getElementsByClassName('musicPlayer')[0].paused) {
+    document.getElementsByClassName('musicPlayer')[0].play();
+  } else {
+    document.getElementsByClassName('musicPlayer')[0].pause();
+  }
+});
+
 var randomColor = function() {
   //create possible array of colors
   var colors = ['green', 'red', 'blue', 'yellow', 'white', 'brown', 'black', 'orange', 'grey'];
