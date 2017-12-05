@@ -5,6 +5,7 @@ $(document).ready(function() {
   window.canCan = false;
   window.stepCount = 0;
   window.canCanTimer;
+  window.paired = false;
   $('.addDancerButton').on('click', function(event) {
     /* This function sets up the click handlers for the create-dancer
      * buttons on dancefloor.html. You should only need to make one small change to it.
@@ -51,7 +52,9 @@ $(document).ready(function() {
 $('.findPartner').on('click', function() {
   //find parnter button clicked
   //iterate through dancers array
-  dancers.forEach(function(dancer) {
+  if (!paired) {
+    paired = true;
+    dancers.forEach(function(dancer) {
     //get random color
     var color = randomColor();
     //get closest dancer
@@ -60,6 +63,12 @@ $('.findPartner').on('click', function() {
     dancer.$node.css({'background-color': `${color}`});
     closest.$node.css({'background-color': `${color}`});
   });
+  } else {
+    dancers.forEach(function(dancer) {
+      dancer.$node.css({'background-color' : 'transparent'});
+      paired = false;
+    });
+  }
 });
 
 $('.followMouse').on('click', function() {
