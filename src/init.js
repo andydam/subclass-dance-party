@@ -1,5 +1,6 @@
 $(document).ready(function() {
   window.dancers = [];
+  window.lineUp = false;
 
   $('.addDancerButton').on('click', function(event) {
     /* This function sets up the click handlers for the create-dancer
@@ -21,37 +22,128 @@ $(document).ready(function() {
     var dancerMakerFunction = window[dancerMakerFunctionName];
 
     // make a dancer with a random position
-
     var dancer = new dancerMakerFunction(
       $('body').height() * Math.random(),
       $('body').width() * Math.random(),
       Math.random() * 1000
     );
+    //add dancer to page
     $('body').append(dancer.$node);
+    //add dancer to dancers storage array
     window.dancers.push(dancer);
-    dancer.$node.mouseover(mouseOver); 
+    //add event handler for mouse over
+    dancer.$node.mouseover(mouseOver);
   });
 });
 
-var mouseOver = function(event) {
+$('.findPartner').on('click', function() {
+  dancers.forEach(function(dancer) {
+    var color = randomColor();
+    var closest = findClosest(dancer);
+    dancer.$node.css({'background-color': `${color}`});
+    closest.$node.css({'background-color': `${color}`});
+  });
+});
+
+var randomColor = function() {
+  //create possible array of colors
   var colors = ['green', 'red', 'blue', 'yellow', 'white', 'brown', 'black', 'orange', 'grey'];
+  //randomly generate index for random color
   var colorIndex = Math.floor(Math.random(colors.length) * 10);
-  var color = colors[colorIndex];
-  let element = event.target;
-  $(element).css({'border': `10px solid ${color}`});
+  //return random color
+  return colors[colorIndex];
 };
 
-var lineup = function() {
-  dancers.forEach(function(dancer, index) {
-    if (dancer.timer) {
+//found rotate animation function online
+var animateRotate = function(element, angle, duration, easing, complete) {
+  var args = $.speed(duration, easing, complete);
+  var step = args.step;
+  return $(element).each(function(i, e) {
+    args.complete = $.proxy(args.complete, e);
+    args.step = function(now) {
+      $.style(e, 'transform', 'rotate(' + now + 'deg)');
+      if (step) { return step.apply(e, arguments); }
+    };
+
+    $({deg: 0}).animate({deg: angle}, args);
+  });
+};
+
+var mouseOver = function(event) {
+  //get target element
+  let element = event.target;
+  //rotate element 360 degrees
+  animateRotate(element, 360);
+};
+
+var lineup = function() { // buggy. If we populate with dancers, invoke lineup, and populate more dancers, they're out of sync.
+  //iterate through all dancers
+  if (!lineUp) {
+    dancers.forEach(function(dancer, index) {
+      //stop dancer's timer
       clearInterval(dancer.timer);
+      //clear dancer's timer
       dancer.timer = null;
+      //stop dancer's animations
       dancer.$node.stop(true, true);
+      //make sure dancer is shown
       dancer.$node.show();
-      dancer.$node.css({'top': `${(index * 20) + 100}px`, 'left': '200px', 'position': 'absolute'});
-    } else {
+      //move dancer in line
+      dancer.$node.css({'background-color': 'transparent', 'top': `${(index * 100) + 32}px`, 'left': '200px', 'position': 'absolute'});
+    });
+    //set lined up status
+    lineUp = true;
+  } else {
+    dancers.forEach(function(dancer, index) {
+      //check if dancer still has timer
+      if (dancer.timer) {
+        //for new dancers populated when lineUp == true
+        //has timer, clear it
+        clearInterval(dancer.timer);
+      }
+      //move dancer back to start position
       dancer.setPosition(dancer.start[0], dancer.start[1]);
-      dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps);
+      //restart dancer's timer
+      dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps); 
+    });
+    //set lined up status
+    lineUp = false;
+  }
+};
+
+var findDistance = function(elem1, elem2) {
+  //find distance between two elements
+  var verticalDiff = Math.abs(elem1[0] - elem2[0]);
+  var horizontalDiff = Math.abs(elem1[1] - elem2[1]);
+
+  return Math.sqrt(Math.pow(verticalDiff, 2) + Math.pow(horizontalDiff, 2));
+};
+
+var findClosest = function(element) {
+  //declare variables for shortest distance and closest element
+  var shortest, closestElement;
+  //iterate through all dancers
+  dancers.forEach(function(dancer) {
+    //test if dancer is the same as current
+    if (dancer !== element) {
+      //not the same, proceed with comparison
+      //get distances between dancers
+      var distance = findDistance([element.$node.position().top, element.$node.position().left], [dancer.$node.position().top, dancer.$node.position().left]);
+      //test if first dancer
+      if (shortest === undefined) {
+        //is first dancer, set shortest and clostElement to first dancer
+        shortest = distance;
+        closestElement = dancer;
+      }
+      //compare current distance with shortest
+      if (distance < shortest) {
+        //is shorter than shortests, set shortest and closestElement
+        shortest = distance;
+        closestElement = dancer;
+      }
     }
   });
+  
+  //return nearest element
+  return closestElement;
 };
