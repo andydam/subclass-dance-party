@@ -29,14 +29,29 @@ $(document).ready(function() {
     );
     $('body').append(dancer.$node);
     window.dancers.push(dancer);
+    dancer.$node.mouseover(mouseOver); 
   });
 });
 
+var mouseOver = function(event) {
+  var colors = ['green', 'red', 'blue', 'yellow', 'white', 'brown', 'black', 'orange', 'grey'];
+  var colorIndex = Math.floor(Math.random(colors.length) * 10);
+  var color = colors[colorIndex];
+  let element = event.target;
+  $(element).css({'border': `10px solid ${color}`});
+};
+
 var lineup = function() {
   dancers.forEach(function(dancer, index) {
-    clearInterval(dancer.timer);
-    dancer.$node.stop(true, true);
-    dancer.$node.show();
-    dancer.$node.css({'top': `${(index * 20) + 100}px`, 'left': '200px', 'position': 'absolute'});
+    if (dancer.timer) {
+      clearInterval(dancer.timer);
+      dancer.timer = null;
+      dancer.$node.stop(true, true);
+      dancer.$node.show();
+      dancer.$node.css({'top': `${(index * 20) + 100}px`, 'left': '200px', 'position': 'absolute'});
+    } else {
+      dancer.setPosition(dancer.start[0], dancer.start[1]);
+      dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps);
+    }
   });
 };
