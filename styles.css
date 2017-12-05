@@ -1,5 +1,6 @@
 body, html{
   height:100%;
+  font-family: Arial;
 }
 body{
   margin: 0px;
@@ -10,6 +11,7 @@ body{
 }
 body, a:link, a:visited, a:active{
   color: lightblue;
+  text-decoration: none;
 }
 
 .dancer{
