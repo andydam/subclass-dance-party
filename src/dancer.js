@@ -1,12 +1,18 @@
-var Dancer = class Dancer {
-
+//declare Dancer class
+var Dancer = class Dancer { 
   constructor (top, left, timeBetweenSteps) {
+    //assign properties of Dancer
+    //create DOM node
     this.$node = $('<div class="dancer"></div>');
     this.timeBetweenSteps = timeBetweenSteps;
-    this.step();
+    //set position of Dancer
     this.setPosition(top, left);
-    this.start = [top, left]
+    //store start position
+    this.start = [top, left];
+    //create storage for timer
     this.timer;
+    //start dance steps
+    this.step();
   }
 
   setPosition (top, left) {
@@ -14,9 +20,12 @@ var Dancer = class Dancer {
       top: top,
       left: left
     };
+    //set start position
     this.$node.css(styleSettings);
   }
+
   step () {
+    //set interval of steps
     this.timer = setTimeout(this.step.bind(this), this.timeBetweenSteps);
   }
 };
