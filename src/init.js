@@ -55,17 +55,17 @@ $('.findPartner').on('click', function() {
   if (!paired) {
     paired = true;
     dancers.forEach(function(dancer) {
-    //get random color
-    var color = randomColor();
-    //get closest dancer
-    var closest = findClosest(dancer);
-    //set pair of dancers to same random color
-    dancer.$node.css({'background-color': `${color}`});
-    closest.$node.css({'background-color': `${color}`});
-  });
+      //get random color
+      var color = randomColor();
+      //get closest dancer
+      var closest = findClosest(dancer);
+      //set pair of dancers to same random color
+      dancer.$node.css({'background-color': `${color}`});
+      closest.$node.css({'background-color': `${color}`});
+    });
   } else {
     dancers.forEach(function(dancer) {
-      dancer.$node.css({'background-color' : 'transparent'});
+      dancer.$node.css({'background-color': 'transparent'});
       paired = false;
     });
   }
