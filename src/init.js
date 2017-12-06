@@ -274,6 +274,8 @@ $('.canCan').on('click', function() {
   if (!settings.canCan.toggle) {
     //return all dancers to stage
     returnAllToStage();
+    //clear lineUp
+    settings.linedUpToggle = false;
     //set cancan dance timer
     settings.canCan.timer = setTimeout(canCanDance, 500);
     //play cancan music
