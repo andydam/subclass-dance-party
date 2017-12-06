@@ -1,11 +1,16 @@
 $(document).ready(function() {
   window.dancers = [];
-  window.lineUp = false;
-  window.following = false;
-  window.canCan = false;
-  window.stepCount = 0;
-  window.canCanTimer;
-  window.paired = false;
+  window.settings = {
+    linedUpToggle: false,
+    followMouseToggle: false,
+    partnerToggle: false,
+    canCan: {
+      toggle: false,
+      timer: null,
+      stepCount: 0
+    }
+  };
+
   $('.addDancerButton').on('click', function(event) {
     /* This function sets up the click handlers for the create-dancer
      * buttons on dancefloor.html. You should only need to make one small change to it.
@@ -36,7 +41,12 @@ $(document).ready(function() {
     //add dancer to dancers storage array
     window.dancers.push(dancer);
     //add event handler for mouse over
-    dancer.$node.mouseover(mouseOver);
+    dancer.$node.mouseover(function(event) {
+      //get target element
+      var element = event.target;
+      //rotate element 360 degrees
+      animateRotate(element, 360);
+    });
   });
 
   //add event listener for follow mouse
@@ -49,60 +59,14 @@ $(document).ready(function() {
   }, false);
 });
 
-$('.findPartner').on('click', function() {
-  //find parnter button clicked
-  //iterate through dancers array
-  if (!paired) {
-    paired = true;
-    dancers.forEach(function(dancer) {
-      //get random color
-      var color = randomColor();
-      //get closest dancer
-      var closest = findClosest(dancer);
-      //set pair of dancers to same random color
-      dancer.$node.css({'background-color': `${color}`});
-      closest.$node.css({'background-color': `${color}`});
-    });
-  } else {
-    dancers.forEach(function(dancer) {
-      dancer.$node.css({'background-color': 'transparent'});
-      paired = false;
-    });
-  }
-});
-
-$('.followMouse').on('click', function() {
-  //follow mouse button clicked
-  if (!following) {
-    //pull first dancer
-    var f = dancers[0];
-    //freeze first dancer
-    freezeAndMove(f, 0, 0);
-    //add follower class
-    f.$node.addClass('follower');
-    //remove mouseover bind
-    f.$node.unbind('mouseover');
-    following = true;
-  } else {
-    //pull first dancer
-    var f = dancers[0];
-    //remove follower class
-    f.$node.removeClass('follower');
-    //rebind mouseover
-    f.$node.mouseover(mouseOver);
-    //reset dancers
-    resetAllDancers();
-    following = false;
-  }
-});
-
-$('.music').on('click', function() {
-  if (document.getElementsByClassName('musicPlayer')[0].paused) {
-    document.getElementsByClassName('musicPlayer')[0].play();
-  } else {
-    document.getElementsByClassName('musicPlayer')[0].pause();
-  }
-});
+var playMusic = function(url) {
+  //set source of music to url
+  document.getElementsByClassName('musicPlayer')[0].setAttribute('src', url);
+  //reload player element
+  document.getElementsByClassName('musicPlayer')[0].load();
+  //play music
+  document.getElementsByClassName('musicPlayer')[0].play();
+};
 
 var randomColor = function() {
   //create possible array of colors
@@ -128,14 +92,8 @@ var animateRotate = function(element, angle, duration, easing, complete) {
   });
 };
 
-var mouseOver = function(event) {
-  //get target element
-  let element = event.target;
-  //rotate element 360 degrees
-  animateRotate(element, 360);
-};
-
 var freezeAndMove = function(element, top, left) {
+  //stop dance and move to top, left
   //stop dancer's timer
   clearInterval(element.timer);
   //clear dancer's timer
@@ -144,36 +102,29 @@ var freezeAndMove = function(element, top, left) {
   element.$node.stop(true, true);
   //make sure dancer is shown
   element.$node.show();
-  //move dancer in line
-  element.$node.css({'top': `${top}px`, 'left': `${left}px`});
+  if (arguments.length > 1) {
+    //move dancer to position
+    element.$node.css({'top': top, 'left': left, 'position': 'absolute'});
+  }
 };
 
-var lineup = function() { // buggy. If we populate with dancers, invoke lineup, and populate more dancers, they're out of sync.
-  //iterate through all dancers
-  if (!lineUp) {
-    dancers.forEach(function(dancer, index) {
-      freezeAndMove(dancer);
-      //move dancer in line
-      var leftPos = 48.5;
-      if (index === 0) {
-        leftPos = 50;
-      } else if (index % 2 === 0) {
-        //if even
-        leftPos += index * 3;
-      } else {
-        //if odd
-        leftPos -= index * 3;
-      }
-      dancer.$node.css({'background-color': 'transparent', 'top': '77%', 'left': `${leftPos}%`, 'position': 'absolute'});
-    });
-    //set lined up status
-    lineUp = true;
-  } else {
-    //reset dancers
-    resetAllDancers();
-    //set lined up status
-    lineUp = false;
-  }
+var returnAllToStage = function() {
+  //move all dancers to stage
+  dancers.forEach(function(dancer, index) {
+    //calculate dancer stage position
+    var leftPos = 48.5;
+    if (index === 0) {
+      leftPos = 50;
+    } else if (index % 2 === 0) {
+      //if even
+      leftPos += index * 3;
+    } else {
+      //if odd
+      leftPos -= index * 3;
+    }
+    //move dancer to stage position
+    freezeAndMove(dancer, '77%', `${leftPos}%`);
+  });
 };
 
 var resetAllDancers = function() {
@@ -192,6 +143,9 @@ var resetAllDancers = function() {
     //restart dancer's timer
     dancer.timer = setTimeout(dancer.step.bind(dancer), dancer.timeBetweenSteps); 
   });
+  //toggle toggles off
+  settings.linedUpToggle = false;
+  settings.canCan.toggle = false;
 };
 
 var findDistance = function(elem1, elem2) {
@@ -231,79 +185,172 @@ var findClosest = function(element) {
   return closestElement;
 };
 
-$('.canCan').on('click', function() {
-  if (!canCan) {
-    lineup();
-    timer = setTimeout(canCanDance, 500);
-    canCan = true;
-    lineUp = false;
-    document.getElementsByClassName('musicPlayer')[0].setAttribute('src', 'https://upload.wikimedia.org/wikipedia/commons/6/63/Offenbach_-_Orpheus_in_the_Underworld_-_Overture%2C_Can_Can_section.ogg');
-    document.getElementsByClassName('musicPlayer')[0].load();
-    document.getElementsByClassName('musicPlayer')[0].play();
-  } else {
-    clearInterval(timer);
-    resetAllDancers();
-    stepCount = 0;
-    timer = null;
-    canCan = false;
-    document.getElementsByClassName('musicPlayer')[0].setAttribute('src', 'https://upload.wikimedia.org/wikipedia/en/c/c3/Super_Mario_Bros._theme.ogg');
-    document.getElementsByClassName('musicPlayer')[0].load();
-    document.getElementsByClassName('musicPlayer')[0].play();
-  }  
-});
-
 var canCanDance = function() {
-  switch (stepCount) {
+  //perform can can dance with all dancers
+  switch (settings.canCan.stepCount) {
   case 0:
-    //move dancer 50px left and 50px up
+    //move all dancers 50px left and 50px up
     $('.dancer').animate({'left': '-=50px', 'top': '-=50px'});
     //advance count by one
-    stepCount = 1;
+    settings.canCan.stepCount = 1;
     break;
   case 1:
-    //move dancer 50px right and 50px down
+    //move all dancers 50px right and 50px down
     $('.dancer').animate({'left': '+=50px', 'top': '+=50px'});
     //advance count by one
-    stepCount = 2;
+    settings.canCan.stepCount = 2;
     break;
   case 2:
-    //move dancer 100px left and 100px up
+    //move all dancers 100px left and 100px up
     $('.dancer').animate({'left': '-=100px', 'top': '-=100px'});
     //advance count by one
-    stepCount = 3;
+    settings.canCan.stepCount = 3;
     break;
   case 3:
-    //move dancer 100px right and 100px down
+    //move all dancers 100px right and 100px down
     $('.dancer').animate({'left': '+=100px', 'top': '+=100px'});
     //advance count by one
-    stepCount = 4;
+    settings.canCan.stepCount = 4;
     break;
   case 4:
-    //move dancer 50px right and 50px up
+    //move all dancers 50px right and 50px up
     $('.dancer').animate({'left': '+=50px', 'top': '-=50px'});
     //advance count by one
-    stepCount = 5;
+    settings.canCan.stepCount = 5;
     break;
   case 5:
-    //move dancer 50px left and 50px down
+    //move all dancers 50px left and 50px down
     $('.dancer').animate({'left': '-=50px', 'top': '+=50px'});
     //advance count by one
-    stepCount = 6;
+    settings.canCan.stepCount = 6;
     break;
   case 6:
-    //move dancer 100px right and 100px up
+    //move all dancers 100px right and 100px up
     $('.dancer').animate({'left': '+=100px', 'top': '-=100px'});
     //advance count by one
-    stepCount = 7;
+    settings.canCan.stepCount = 7;
     break;
   case 7:
-    //move dancer 100px left and 50px down
+    //move all dancers 100px left and 50px down
     $('.dancer').animate({'left': '-=100px', 'top': '+=100px'});
-    //advance count by one
-    stepCount = 0;
+    //set count to zero
+    settings.canCan.stepCount = 0;
     break;
   }
 
-  //set interval of steps
-  timer = setTimeout(canCanDance, 500);
+  //call canCanDance again
+  settings.canCan.timer = setTimeout(canCanDance, 350);
 };
+
+$('.lineUp').on('click', function() {
+  //lineUp button clicked
+  //iterate through all dancers
+  if (!settings.linedUpToggle) {
+    if (settings.canCan.toggle) {
+      //if cancan is running stop all cancan
+      //stop cancan dance timer
+      clearInterval(settings.canCan.timer);
+      //reset music back to mario theme song
+      playMusic('https://upload.wikimedia.org/wikipedia/en/c/c3/Super_Mario_Bros._theme.ogg');
+      //clear cancan settings
+      settings.canCan.stepCount = 0;
+      settings.canCan.timer = null;
+      settings.canCan.toggle = false;
+    }
+    //return all dancers to stage
+    returnAllToStage();
+    //set toggle
+    settings.linedUpToggle = true;
+  } else {
+    //reset dancers
+    resetAllDancers();
+    //set lined up status
+    settings.linedUpToggle = false;
+  }
+});
+
+$('.canCan').on('click', function() {
+  //canCan button clicked
+  if (!settings.canCan.toggle) {
+    //return all dancers to stage
+    returnAllToStage();
+    //set cancan dance timer
+    settings.canCan.timer = setTimeout(canCanDance, 500);
+    //play cancan music
+    playMusic('https://upload.wikimedia.org/wikipedia/commons/6/63/Offenbach_-_Orpheus_in_the_Underworld_-_Overture%2C_Can_Can_section.ogg');
+    //set cancan toggle
+    settings.canCan.toggle = true;
+  } else {
+    //clear cancan dance timer
+    clearInterval(settings.canCan.timer);
+    //reset all dancers
+    resetAllDancers();
+    //reset music back to mario theme song
+    playMusic('https://upload.wikimedia.org/wikipedia/en/c/c3/Super_Mario_Bros._theme.ogg');
+    //clear cancan settings
+    settings.canCan.stepCount = 0;
+    settings.canCan.timer = null;
+    settings.canCan.toggle = false;
+  }
+});
+
+$('.findPartner').on('click', function() {
+  //find partner button clicked
+  //iterate through dancers array
+  if (!settings.partnerToggle) {
+    dancers.forEach(function(dancer) {
+      //get random color
+      var color = randomColor();
+      //get closest dancer
+      var closest = findClosest(dancer);
+      //set pair of dancers to same random color
+      dancer.$node.css({'background-color': `${color}`});
+      closest.$node.css({'background-color': `${color}`});
+    });
+    //set toggle
+    settings.partnerToggle = true;
+  } else {
+    //clear background-color
+    dancers.forEach(function(dancer) {
+      dancer.$node.css({'background-color': 'transparent'});
+    });
+    //set toggle
+    settings.partnerToggle = false;
+  }
+});
+
+$('.followMouse').on('click', function() {
+  //follow mouse button clicked
+  if (!settings.followMouseToggle) {
+    //pull first dancer
+    var f = dancers[0];
+    //freeze first dancer
+    freezeAndMove(f, 0, 0);
+    //add follower class
+    f.$node.addClass('follower');
+    //remove mouseover bind
+    f.$node.unbind('mouseover');
+    settings.followMouseToggle = true;
+  } else {
+    //pull first dancer
+    var f = dancers[0];
+    //remove follower class
+    f.$node.removeClass('follower');
+    //rebind mouseover
+    f.$node.mouseover(mouseOver);
+    //reset dancers
+    resetAllDancers();
+    settings.followMouseToggle = false;
+  }
+});
+
+$('.music').on('click', function() {
+  //music button clicked
+  if (document.getElementsByClassName('musicPlayer')[0].paused) {
+    //play music
+    document.getElementsByClassName('musicPlayer')[0].play();
+  } else {
+    //pause music
+    document.getElementsByClassName('musicPlayer')[0].pause();
+  }
+});
