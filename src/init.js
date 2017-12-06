@@ -42,10 +42,12 @@ $(document).ready(function() {
     window.dancers.push(dancer);
     //add event handler for mouse over
     dancer.$node.mouseover(function(event) {
-      //get target element
-      var element = event.target;
-      //rotate element 360 degrees
-      animateRotate(element, 360);
+      if (!settings.canCan.toggle) {
+        //get target element
+        var element = event.target;
+        //rotate element 360 degrees
+        animateRotate(element, 360);
+      }
     });
   });
 
