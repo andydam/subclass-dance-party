@@ -1,5 +1,7 @@
 $(document).ready(function() {
+  //declare array to store all dancers
   window.dancers = [];
+  //declare object to store settings variables
   window.settings = {
     linedUpToggle: false,
     followMouseToggle: false,
@@ -12,36 +14,36 @@ $(document).ready(function() {
   };
 
   $('.addDancerButton').on('click', function(event) {
-    /* This function sets up the click handlers for the create-dancer
-     * buttons on dancefloor.html. You should only need to make one small change to it.
-     * As long as the "data-dancer-maker-function-name" attribute of a
-     * class="addDancerButton" DOM node matches one of the names of the
-     * maker functions available in the global scope, clicking that node
-     * will call the function to make the dancer.
-     */
-
-    /* dancerMakerFunctionName is a string which must match
-     * one of the dancer maker functions available in global scope.
-     * A new object of the given type will be created and added
-     * to the stage.
-     */
+    //add dancer button clicked
+    //grab dancer class name from data tag
     var dancerMakerFunctionName = $(this).data('dancer-maker-function-name');
 
     // get the maker function for the kind of dancer we're supposed to make
     var dancerMakerFunction = window[dancerMakerFunctionName];
-
+    
+    //generate random position within determined bounds
+    var maxWidth = ($('body').width() * parseFloat(3 / 4));
+    var minWidth = ($('body').width() * parseFloat(1 / 6)); 
+    var maxHeight = ($('body').height() * parseFloat(3 / 4));
+    var minHeight = ($('body').height() * parseFloat(1 / 6));
+    var height = getRandomInt(minHeight, maxHeight);
+    var width = getRandomInt(minWidth, maxWidth);
+    
     // make a dancer with a random position
     var dancer = new dancerMakerFunction(
-      $('body').height() * Math.random(),
-      $('body').width() * Math.random(),
+      height,
+      width,
       Math.random() * 1000
     );
+    
     //add dancer to page
     $('body').append(dancer.$node);
     //add dancer to dancers storage array
     window.dancers.push(dancer);
     //add event handler for mouse over
     dancer.$node.mouseover(function(event) {
+      //test if cancan is running
+      //do not spin if cancan is running
       if (!settings.canCan.toggle) {
         //get target element
         var element = event.target;
@@ -60,6 +62,11 @@ $(document).ready(function() {
     }
   }, false);
 });
+
+var getRandomInt = function(min, max) {
+  //get random number between min and max
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
 var playMusic = function(url) {
   //set source of music to url
